@@ -1,5 +1,10 @@
-import { Link, navigate, routes } from '@redwoodjs/router'
 import { useRef } from 'react'
+import { useEffect } from 'react'
+
+import { Backdrop, Card, CardContent, Typography } from '@mui/material'
+import { withLDConsumer } from 'launchdarkly-react-client-sdk'
+
+import { useAuth } from '@redwoodjs/auth'
 import {
   Form,
   Label,
@@ -8,12 +13,11 @@ import {
   FieldError,
   Submit,
 } from '@redwoodjs/forms'
-import { useAuth } from '@redwoodjs/auth'
+import { Link, navigate, routes } from '@redwoodjs/router'
 import { MetaTags } from '@redwoodjs/web'
 import { toast, Toaster } from '@redwoodjs/web/toast'
-import { useEffect } from 'react'
 
-const SignupPage = () => {
+const SignupPage = ({ flags }) => {
   const { isAuthenticated, signUp } = useAuth()
 
   useEffect(() => {
@@ -41,12 +45,28 @@ const SignupPage = () => {
     }
   }
 
+  const registrationClosed = flags.registration
+
+  console.log(`registration is currently closed: ${registrationClosed}`)
+
   return (
     <>
       <MetaTags title="Signup" />
 
       <main className="rw-main">
         <Toaster toastOptions={{ className: 'rw-toast', duration: 6000 }} />
+        <Backdrop
+          open={registrationClosed}
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        >
+          <Card>
+            <CardContent>
+              <Typography variant="h5" color="text.primary">
+                Registration is currently closed
+              </Typography>
+            </CardContent>
+          </Card>
+        </Backdrop>
         <div className="rw-scaffold rw-login-container">
           <div className="rw-segment">
             <header className="rw-segment-header">
@@ -121,4 +141,4 @@ const SignupPage = () => {
   )
 }
 
-export default SignupPage
+export default withLDConsumer()(SignupPage)
